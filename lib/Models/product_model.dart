@@ -32,7 +32,7 @@ class ProductModel {
 }
 
 class RatingModel {
-  final Float rate;
+  final double rate;
   final int count;
   RatingModel({required this.rate, required this.count});
 

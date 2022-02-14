@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:store_app/Models/product_model.dart';
+import 'package:store_app/Services/all_products_services.dart';
+import 'package:store_app/Widgets/custom_card.dart';
+import 'package:store_app/screens/product_details.dart';
 
 class HomePage extends StatelessWidget {
   static const String routeName = 'HomePage';
@@ -25,58 +29,33 @@ class HomePage extends StatelessWidget {
           )
         ],
       ),
-      body: GridView.builder(
-        gridDelegate:
-            const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
-        itemBuilder: (context, index) => gridBuilder(
-            description: 'Description',
-            title: 'Ttle',
-            context: context,
-            imageUrl:
-                'https://cdn.pixabay.com/photo/2021/08/25/20/42/field-6574455__340.jpg'),
-        itemCount: 10,
-      ),
-    );
-  }
-
-  Widget gridBuilder(
-      {required String imageUrl,
-      required BuildContext context,
-      required String title,
-      required String description}) {
-    double cardHeight = MediaQuery.of(context).size.height * 0.2;
-    return Container(
-      height: cardHeight,
-      child: Card(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Image(
-              image: NetworkImage(imageUrl),
-              fit: BoxFit.cover,
-              height: cardHeight * 0.8,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(title),
-                    Text(description),
-                  ],
-                ),
-                IconButton(
-                    onPressed: () {},
-                    icon: const Icon(
-                      FontAwesomeIcons.heart,
-                      color: Colors.red,
-                    ))
-              ],
-            )
-          ],
-        ),
+      body: FutureBuilder<List<ProductModel>>(
+        future: AllProductsServices().getAllProducts(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            List<ProductModel> products = snapshot.data!;
+            return GridView.builder(
+              itemBuilder: (context, index) {
+                return GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).pushNamed(ProductDetails.routName,
+                          arguments: products[index]);
+                    },
+                    child: customCard(products[index]));
+              },
+              itemCount: products.length,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  childAspectRatio: 1.2,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10),
+            );
+          } else {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+        },
       ),
     );
   }
